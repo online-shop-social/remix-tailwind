@@ -92,7 +92,7 @@ In your `package.json` edit this:
 
 ```json
  "scripts": {
-      "build": "npm run build:css && remix build",
+    "build": "npm run build:css && remix build",
     "build:css": "tailwindcss -m -i ./styles/app.css -o app/styles/app.css",
     "dev": "remix build && run-p dev:*",
     "dev:node": "cross-env NODE_ENV=development nodemon ./build/index.js --watch ./build/index.js",
@@ -132,8 +132,32 @@ In this demo, we will create a simple website where a user can:
 
 We therefore need 2 Models with a one to many relationship.
 
-To define our relationships, let's jump into the 
-After creating our models we will run:
+To define our relationships, let's jump into the `schema.prisma` file in the prisma folder!
+
+First, we will create an `Album` model that will have a unique name and id (which auto-increments), an image and an array of `songs`.
+
+```js
+model Album {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  image String
+  songs Song[]
+}
+```
+
+Next, we will create a `Songs` model that will have an id (which auto-increments), a name, an image url, and an album to which it belongs to.
+
+```js
+model Song {
+  id      Int      @id @default(autoincrement())
+  name   String @unique
+  image   String
+  albumId Int
+  album   Album    @relation(fields: [albumId], references: [id])
+}
+```
+
+After creating our models we will run to deploy our changes to the db:
 
 ```bash
 npx prisma migrate dev --name first_migration
