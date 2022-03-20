@@ -58,10 +58,81 @@ With that, go to the prisma folder, in the `schema.prisma` file and check out th
 
 ### Setup Tailwind
 
-To build a beautiful
+To build a beautiful yet simple UI, we will employ tailwind CSS. But hey, feel free to use whichever you want.
+
+To install Tailwind run:
+
+```bash
+npm install -D tailwindcss postcss autoprefixer concurrently
+```
+
+That command will install a couple of packages used to post-compile tailwind.
+
+Next, we will run the following command to initialize tailwind in the project, create `tailwind` and `postcss` config files.
+
+```bash
+npx tailwind init -p
+```
+
+In your root folder, you should see 2 files created, `tailwind.config.js` and `postcss.config.js`
+
+Next, Let's add the files to our template files to our tailwind config. Change the lines below:
+
+```js
+...
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx}",
+  ],
+...
+```
+
+Next, we will edit our package.json scripts to compile our tailwind code during the build process.
+
+In your `package.json` edit this:
+
+```json
+ "scripts": {
+      "build": "npm run build:css && remix build",
+    "build:css": "tailwindcss -m -i ./styles/app.css -o app/styles/app.css",
+    "dev": "remix build && run-p dev:*",
+    "dev:node": "cross-env NODE_ENV=development nodemon ./build/index.js --watch ./build/index.js",
+    "dev:remix": "remix watch",
+    "dev:css": "tailwindcss -w -i ./styles/app.css -o app/styles/app.css",
+    "postinstall": "remix setup node",
+    "start": "cross-env NODE_ENV=production node ./build/index.js"
+  }
+``
+
+Next, add the tailwind directives to your css. Create a css file and add the following. I prefer creating a seperate folder for my css.
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+Finally, import your css file into the root file at `./app/root.jsx`
+
+```jsx
+import styles from "./styles/app.css"
+
+export function links() {
+  return [{ rel: "stylesheet", href: styles }]
+}
+```
+
+Now we are all set!
 
 ## Modelling Our data
 
+In this demo, we will create a simple website where a user can:
+
+- Add an album using a form
+- Click on the album and get a view with all songs in the album.
+
+We therefore need 2 Models with a one to many relationship.
+
+To define our relationships, let's jump into the 
 After creating our models we will run:
 
 ```bash
