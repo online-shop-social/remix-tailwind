@@ -162,3 +162,8 @@ After creating our models we will run to deploy our changes to the db:
 ```bash
 npx prisma migrate dev --name first_migration
 ```
+
+Boom, we have our db setup. Let's get our hands dirty.
+
+## Diving into Remix! 🚀
+
