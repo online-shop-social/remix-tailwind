@@ -167,3 +167,147 @@ Boom, we have our db setup. Let's get our hands dirty.
 
 ## Diving into Remix! 🚀
 
+To get started, let's dive into the `./app/routes/index.tsx`. This will be the route page for our website. In this `routes` folder, we can declare routes to other pages.
+
+For example crearing an `albums` folder and an `index.tsx` will create a route `/albums`.
+
+Let's add a simple landing page for out website. In our `routes/index.tsx`
+
+```jsx
+export default function Index() {
+  return (
+    <div className='flex flex-col items-center justify-center min-h-screen py-2'>
+      <main className='flex flex-col items-center justify-center w-full flex-1 px-20 text-center'>
+        <h1 className='text-2xl xs:text-3xl md:text-6xl font-bold'>
+          Welcome to{' '}
+          <a className='text-green-600'>
+            Music Box
+          </a>
+        </h1>
+      </main>
+    </div>
+  );
+}
+```
+
+Next, let's display some data. Since we don't have a way to add data to our db, we will use `prisma studio`. To use it run:
+
+```bash
+npx prisma studio
+```
+
+Now go to `http://localhost:5555` and have fun feeding in data to the tables.
+
+Assuming you have some data, we can now fetch our albums and display them!
+
+### Data Loading in Remix
+
+A cool thing about Remix is that data loading is well in-built into the framework.
+
+How this works is that the react component in the route, is it's own API route. It has the capability to talk to your server itself. Cool right?
+
+This is awesome because you don't have to fetch data to an endpoint because the page itself, is an endpoint. Let's see this in practice.
+
+Let's create a function that will be called when we need to fetch data. let's call it `loader`. In the function, we will:
+
+- Create a prisma Client to connect to prisma
+- Query all albums in the db and return the data
+- close our prisma client.
+
+The code will looks like this:
+
+```jsx
+export async function loader() {
+  const prisma = new PrismaClient();
+  const allAlbums = await prisma.album.findMany();
+  console.log(allAlbums);
+  await prisma.$disconnect();
+  return allAlbums;
+}
+```
+
+The loader function should be outside your outside your main `index` function. To access the data we returned in the function, we import the data using `useLoader()` exported from `Remix`.
+
+Loaders act like the API's, they will fetch the data, and hydrate the index component. N
+
+Now, let's get our data. Within the `index` function (UI component), before the return statement create a variable to get the data from the loader.
+
+```jsx
+const albums = useLoaderData();
+```
+
+We can now loop over the data and display it. So now inside the Ui component, Right below our title. add this code:
+
+```jsx
+        <div className='mt-4 grid grid-cols-1 xs:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4'>
+          {albums.map((item: any) => (
+            <div className='bg-gray-900 shadow-lg rounded p-3' key={item.id}>
+              <div className='group relative'>
+                <img className='w-full h-full md:w-72 block rounded' src={item.image} alt='not found' />
+              </div>
+              <div className='p-5'>
+                <h3 className='text-white text-lg'>{item.name}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+```
+
+### Adding Data to DB
+
+We need to add data into our db. Let's create a form to add data.
+
+We will import `Form` tag exported from the `remix` library. We have to specify the `http method` we want our form to use when submitted. We will use `Post` to send data to the db.
+
+We will then add the form components.
+
+```jsx
+      <Form method='post' className="bg-white shadow-lg rounded px-12 pt-6 pb-8 mb-4">
+          <div className="mb-4">
+            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name='name' placeholder="Name" size={30} />
+          </div>
+          <div className='mb-4'>
+            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" name='image' placeholder="Album Art" size={30} />
+          </div>
+          <button className='rounded-lg border-2 border-solid border-green-600 p-5 text-center text-green-600 mt-10' type="submit" disabled={busy}>
+            {busy ? "creating..." : "creating New Album"}
+          </button>
+        </Form>
+```
+
+Your suspicion is right, Remix forms work almost the same as native HTML forms, with some sugar on top.
+
+We used the `busy` key word. In remix, you can track the pending navigation of the web-app, by using the `useTransition` hook.
+
+Outside the return statement, create an if statement to check if the app is pending a navigation caused by submitting the form. We do that like this:
+
+```jsx
+  const { state } = useTransition();
+  const busy = state === "submitting";
+```
+
+So when the state of the component is `submitting`, we can track store that state and use it in our app like we did in the button.
+
+To now submit the data, we need an `action` function, that will be called by the form to submit the data. Now outside of the UI component, have this:
+
+```jsx
+export async function action({ request }) {
+  const form = await request.formData();
+  const prisma = new PrismaClient();
+  const allAlbums = await prisma.album.create({
+    data: { name: form.get('name'), image: form.get('image') },
+  });
+  console.log(allAlbums);
+  await prisma.$disconnect();
+  return true;
+}
+
+```
+
+Notice how easy it is to have access to our form values by name using the syntax `form.get()`.
+
+Now filling in your form should create a new album 🚀
+
+You'll be able see the new album immediately without refreshing your browser because, the UI is hydrated with the data immediately.
+
+### Dynamic Routing in Remix
