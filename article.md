@@ -311,3 +311,21 @@ Now filling in your form should create a new album 🚀
 You'll be able see the new album immediately without refreshing your browser because, the UI is hydrated with the data immediately.
 
 ### Dynamic Routing in Remix
+
+We now want to be able to view which songs are in an album. We will need to go to a different route and fetch data for that album.
+
+First, we make our albums clickable and have them direct us to a different route.
+
+Wrap your Card component with a `Link` tag, imported from `remix`.
+
+```jsx
+ <Link to={`/songs/${item.id}`}>
+             ....your card...
+            </Link>
+```
+
+Let's create a folder in routes called `songs` and in it, create a file, `$id.tsx`. In the file, add the following code.
+
+```jsx
+
+```

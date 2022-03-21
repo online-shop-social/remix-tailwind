@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { Form, useLoaderData, useTransition } from "remix";
+import { Form, Link, useLoaderData, useTransition } from "remix";
 
 export async function loader() {
   const prisma = new PrismaClient();
@@ -47,13 +47,17 @@ export default function Index() {
         </Form>
         <div className='mt-4 grid grid-cols-1 xs:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4'>
           {albums.map((item: any) => (
+
             <div className='bg-gray-900 shadow-lg rounded p-3' key={item.id}>
               <div className='group relative'>
                 <img className='w-full h-full md:w-72 block rounded' src={item.image} alt='not found' />
               </div>
               <div className='p-5'>
-                <h3 className='text-white text-lg'>{item.name}</h3>
+                <h3 className='text-green text-lg'>{item.name}</h3>
               </div>
+              {/* <Link to={`/songs/${item.id}`}>
+                <button>View Details</button>
+              </Link> */}
             </div>
           ))}
         </div>
